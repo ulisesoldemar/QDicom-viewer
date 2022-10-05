@@ -8,8 +8,9 @@ from PySide2.QtWidgets import (
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
-from DicomLoader import DicomLoader
+from DicomLoader import DicomLoader, InvalidDICOM, DICOMNotFound
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -24,6 +25,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.actionAbrir.triggered.connect(self.open_folder)
+        self.ui.actionSalir.triggered.connect(lambda: self.close())
 
         # Carga de métodos para cada tipo de input
         self.ui.axialSlider.valueChanged.connect(self.update_axial_plane)
@@ -40,7 +42,11 @@ class MainWindow(QMainWindow):
 
     def _load_planes(self, path):
         # Se cargan las imágenes DICOM
-        self.dcm = DicomLoader(path)
+        try:
+            self.dcm = DicomLoader(path)
+        except (InvalidDICOM, DICOMNotFound) as e:
+            QMessageBox.critical(self, 'Error', f'{str(e)}')
+            return
 
         # Límites espectrales
         self.min_spectrum = self.dcm.min
@@ -54,6 +60,11 @@ class MainWindow(QMainWindow):
         self._draw_plane('sagital', 0)
         self._draw_plane('coronal', 0)
 
+        QMessageBox.information(
+            self,
+            'Archivos cargados',
+            f'Se cargaron {len(self.dcm.slices)} archivos'
+        )
 
     def _init_ui(self):
         # Se habilitan los sliders después de cargar las imágenes
@@ -98,7 +109,7 @@ class MainWindow(QMainWindow):
         data = self.dcm.plane(plane, index)
 
         # Inicialización del canvas para mostrar el corte
-        fig = Figure()
+        fig = Figure(figsize=plt.figaspect(data)/2)
         canvas = FigureCanvas(fig)
         scene = QGraphicsScene()
         scene.addWidget(canvas)
@@ -108,10 +119,8 @@ class MainWindow(QMainWindow):
             case 'axial':
                 self.ui.axialView.setScene(scene)
             case 'sagital':
-                data = data.T
                 self.ui.sagitalView.setScene(scene)
             case 'coronal':
-                data = data.T
                 self.ui.coronalView.setScene(scene)
 
         # Eliminación de bordes y labels de la imagen
