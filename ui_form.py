@@ -95,37 +95,64 @@ class Ui_MainWindow(object):
 
         self.gridLayout_2.addWidget(self.coronalView, 4, 0, 1, 2)
 
+        self.label_6 = QLabel(self.centralwidget)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout_2.addWidget(self.label_6, 3, 2, 1, 1)
+
         self.formLayout = QFormLayout()
         self.formLayout.setObjectName(u"formLayout")
         self.label_4 = QLabel(self.centralwidget)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_4)
-
-        self.label_5 = QLabel(self.centralwidget)
-        self.label_5.setObjectName(u"label_5")
-
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_5)
-
-        self.maxDoubleSpinBox = QDoubleSpinBox(self.centralwidget)
-        self.maxDoubleSpinBox.setObjectName(u"maxDoubleSpinBox")
-        self.maxDoubleSpinBox.setEnabled(False)
-
-        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.maxDoubleSpinBox)
+        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_4)
 
         self.minDoubleSpinBox = QDoubleSpinBox(self.centralwidget)
         self.minDoubleSpinBox.setObjectName(u"minDoubleSpinBox")
         self.minDoubleSpinBox.setEnabled(False)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.minDoubleSpinBox)
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.minDoubleSpinBox)
+
+        self.label_5 = QLabel(self.centralwidget)
+        self.label_5.setObjectName(u"label_5")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_5)
+
+        self.maxDoubleSpinBox = QDoubleSpinBox(self.centralwidget)
+        self.maxDoubleSpinBox.setObjectName(u"maxDoubleSpinBox")
+        self.maxDoubleSpinBox.setEnabled(False)
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.maxDoubleSpinBox)
+
+        self.label_7 = QLabel(self.centralwidget)
+        self.label_7.setObjectName(u"label_7")
+
+        self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label_7)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.minLineEdit = QLineEdit(self.centralwidget)
+        self.minLineEdit.setObjectName(u"minLineEdit")
+        self.minLineEdit.setEnabled(False)
+
+        self.horizontalLayout.addWidget(self.minLineEdit)
+
+        self.label_9 = QLabel(self.centralwidget)
+        self.label_9.setObjectName(u"label_9")
+
+        self.horizontalLayout.addWidget(self.label_9)
+
+        self.maxLineEdit = QLineEdit(self.centralwidget)
+        self.maxLineEdit.setObjectName(u"maxLineEdit")
+        self.maxLineEdit.setEnabled(False)
+
+        self.horizontalLayout.addWidget(self.maxLineEdit)
 
 
-        self.gridLayout_2.addLayout(self.formLayout, 4, 2, 1, 1)
+        self.formLayout.setLayout(0, QFormLayout.FieldRole, self.horizontalLayout)
 
-        self.label_6 = QLabel(self.centralwidget)
-        self.label_6.setObjectName(u"label_6")
 
-        self.gridLayout_2.addWidget(self.label_6, 3, 2, 1, 1)
+        self.gridLayout_2.addLayout(self.formLayout, 4, 2, 1, 2)
 
 
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
@@ -158,9 +185,11 @@ class Ui_MainWindow(object):
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Plano coronal", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Plano axial", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Plano sagital", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"M\u00ednimo", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"M\u00e1ximo", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Controlador espectral", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"L\u00edmite inferior", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"L\u00edmite superior", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Rango espectral", None))
+        self.label_9.setText(QCoreApplication.translate("MainWindow", u"a", None))
         self.menuArchivo.setTitle(QCoreApplication.translate("MainWindow", u"Archivo", None))
     # retranslateUi
 

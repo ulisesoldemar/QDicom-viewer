@@ -38,18 +38,41 @@ class MainWindow(QMainWindow):
         self.ui.maxDoubleSpinBox.valueChanged.connect(self.update_spectrum)
 
 
+    def _load_planes(self, path):
+        # Se cargan las imágenes DICOM
+        self.dcm = DicomLoader(path)
+
+        # Límites espectrales
+        self.min_spectrum = self.dcm.min
+        self.max_spectrum = self.dcm.max
+
+        # Se habilitan los elementos gráficos
+        self._init_ui()
+
+        # Se dibujan los planos
+        self._draw_plane('axial', 0)
+        self._draw_plane('sagital', 0)
+        self._draw_plane('coronal', 0)
+
+
     def _init_ui(self):
+        # Se habilitan los sliders después de cargar las imágenes
         self.ui.axialSlider.setEnabled(True)
         self.ui.sagitalSlider.setEnabled(True)
         self.ui.coronalSlider.setEnabled(True)
 
+        # Se habilitan los spinbox después de cargar las imágenes
         self.ui.axialSpinBox.setEnabled(True)
         self.ui.sagitalSpinBox.setEnabled(True)
         self.ui.coronalSpinBox.setEnabled(True)
 
+        # Se habilitan los float spinbox después de cargar las imágenes
         self.ui.minDoubleSpinBox.setEnabled(True)
         self.ui.maxDoubleSpinBox.setEnabled(True)
 
+        # Límites espectrales en el GUI
+        self.ui.minLineEdit.setText(str(self.dcm.min))
+        self.ui.maxLineEdit.setText(str(self.dcm.max))
         self.ui.minDoubleSpinBox.setRange(self.dcm.min, self.dcm.max)
         self.ui.maxDoubleSpinBox.setRange(self.dcm.min, self.dcm.max)
 
@@ -70,29 +93,17 @@ class MainWindow(QMainWindow):
         self.ui.coronalSpinBox.setRange(0, coronal_limit - 1)
 
 
-    def _load_planes(self, path):
-        # Se cargan las imágenes DICOM
-        self.dcm = DicomLoader(path)
-
-        # Límites espectrales
-        self.min_spectrum = self.dcm.min
-        self.max_spectrum = self.dcm.max
-
-        # Se habilitan los elementos gráficos
-        self._init_ui()
-
-        # Se dibujan los planos
-        self._draw_plane('axial', 0)
-        self._draw_plane('sagital', 0)
-        self._draw_plane('coronal', 0)
-
-
     def _draw_plane(self, plane: str, index: int) -> None:
+        # Se obtiene la matriz de píxeles del corte indicado por index
         data = self.dcm.plane(plane, index)
+
+        # Inicialización del canvas para mostrar el corte
         fig = Figure()
         canvas = FigureCanvas(fig)
         scene = QGraphicsScene()
         scene.addWidget(canvas)
+
+        # Según el plano, se dibuja en su vista correspondiente
         match plane:
             case 'axial':
                 self.ui.axialView.setScene(scene)
@@ -103,14 +114,19 @@ class MainWindow(QMainWindow):
                 data = data.T
                 self.ui.coronalView.setScene(scene)
 
+        # Eliminación de bordes y labels de la imagen
         ax = fig.add_axes([0, 0, 1, 1])
         ax.set_axis_off()
+
+        # Se muestra la imagen
         ax.imshow(data, cmap = 'gray', vmin=self.min_spectrum, vmax=self.max_spectrum)
 
 
     def _update_plane(self, plane: str, index: int) -> None:
         try:
+            # Se dibuja el corte en el plano seleccionado
            self._draw_plane(plane, index)
+           # Modificación de los valores del slider/spinbox según el plano
            match plane:
                case 'axial':
                    self.ui.axialSlider.setValue(index)
@@ -122,6 +138,7 @@ class MainWindow(QMainWindow):
                    self.ui.coronalSlider.setValue(index)
                    self.ui.coronalSpinBox.setValue(index)
 
+        # En caso de no haber abierto la carpeta
         except AttributeError as e:
             print(e)
             QMessageBox.critical(
@@ -139,11 +156,21 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_spectrum(self) -> None:
+        # Valores de actualización de la ventana espectro
         self.min_spectrum = self.ui.minDoubleSpinBox.value()
         self.max_spectrum = self.ui.maxDoubleSpinBox.value()
+
+        # Se limita el valor mínimo y el máximo para que no
+        # suceda min > max
+        self.ui.minDoubleSpinBox.setMaximum(self.max_spectrum)
+        self.ui.maxDoubleSpinBox.setMinimum(self.min_spectrum)
+
+        # Se recupera el index actual
         axial_index = self.ui.axialSpinBox.value()
         sagital_index = self.ui.sagitalSpinBox.value()
         coronal_index = self.ui.coronalSpinBox.value()
+
+        # Se redibuja el plano con la nueva resolución espectral
         self._draw_plane('axial', axial_index)
         self._draw_plane('sagital', sagital_index)
         self._draw_plane('coronal', coronal_index)
