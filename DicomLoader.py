@@ -3,12 +3,33 @@ import pydicom
 import numpy as np
 import glob
 
+class InvalidDICOM(Exception):
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+        self.message = 'Archivo no válido'
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'{self.message}: {self.filename}'
+
+
+class DICOMNotFound(Exception):
+    def __str__(self):
+        return 'No se encontraron archivos DICOM válidos'
+
+
 class DicomLoader:
     def __init__(self, path: str) -> None:
         # Carga de archivos
         files = []
-        for fname in glob.glob(path, recursive=False):
-            files.append(pydicom.dcmread(fname))
+        try:
+            for fname in glob.glob(path, recursive=False):
+                files.append(pydicom.dcmread(fname))
+        except pydicom.errors.InvalidDicomError:
+            raise InvalidDICOM(fname)
+
+        if not len(files):
+            raise DICOMNotFound
 
         # Se saltan los archivos sin SliceLocation (ej. scout views)
         self.slices = []
@@ -56,9 +77,10 @@ class DicomLoader:
             case 'axial':
                 return self.img3d[:, :, slice_index]
             case 'sagital':
-                return self.img3d[:, slice_index, :]
+                return self.img3d[:, slice_index, :].T
             case 'coronal':
-                return self.img3d[slice_index, :, :]
+                return self.img3d[slice_index, :, :].T
+
 
     def anonymize(self, override: bool=True) -> None:
         pass
