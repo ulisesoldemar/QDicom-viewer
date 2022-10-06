@@ -54,8 +54,8 @@ class DicomLoader:
         # Creación de la matriz 3D
         y, x = self.slices[0].pixel_array.shape
         z = len(self.slices)
-        img_shape = (y, x, z)
-        self.img3d = np.zeros(img_shape)
+        self.shape = (y, x, z)
+        self.img3d = np.zeros(self.shape)
 
         # Se rellena la matriz 3D con los píxeles de cada corte
         # y se aplica una regresión lineal para mejorar la calidad de la
