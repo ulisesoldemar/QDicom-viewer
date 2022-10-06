@@ -24,49 +24,12 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.ui.actionAbrir.triggered.connect(self.open_folder)
-        self.ui.actionSalir.triggered.connect(lambda: self.close())
-
-        # Carga de métodos para cada tipo de input
-        self.ui.axialSlider.valueChanged.connect(self.update_axial_plane)
-        self.ui.sagitalSlider.valueChanged.connect(self.update_sagital_plane)
-        self.ui.coronalSlider.valueChanged.connect(self.update_coronal_plane)
-
-        self.ui.axialSpinBox.valueChanged.connect(self.update_axial_plane)
-        self.ui.sagitalSpinBox.valueChanged.connect(self.update_sagital_plane)
-        self.ui.coronalSpinBox.valueChanged.connect(self.update_coronal_plane)
-
-        self.ui.minDoubleSpinBox.valueChanged.connect(self.update_spectrum)
-        self.ui.maxDoubleSpinBox.valueChanged.connect(self.update_spectrum)
+        # Se conectan las acciones de apertura y cierre
+        self.ui.actionCarpeta.triggered.connect(self.open_folder)
+        self.ui.actionSalir.triggered.connect(self.close)
 
 
-    def _load_planes(self, path):
-        # Se cargan las imágenes DICOM
-        try:
-            self.dcm = DicomLoader(path)
-        except (InvalidDICOM, DICOMNotFound) as e:
-            QMessageBox.critical(self, 'Error', f'{str(e)}')
-            return
-
-        # Límites espectrales
-        self.min_spectrum = self.dcm.min
-        self.max_spectrum = self.dcm.max
-
-        # Se habilitan los elementos gráficos
-        self._init_ui()
-
-        # Se dibujan los planos
-        self._draw_plane('axial', 0)
-        self._draw_plane('sagital', 0)
-        self._draw_plane('coronal', 0)
-
-        QMessageBox.information(
-            self,
-            'Archivos cargados',
-            f'Se cargaron {len(self.dcm.slices)} archivos'
-        )
-
-    def _init_ui(self):
+    def __enable_inputs(self) -> None:
         # Se habilitan los sliders después de cargar las imágenes
         self.ui.axialSlider.setEnabled(True)
         self.ui.sagitalSlider.setEnabled(True)
@@ -81,6 +44,8 @@ class MainWindow(QMainWindow):
         self.ui.minDoubleSpinBox.setEnabled(True)
         self.ui.maxDoubleSpinBox.setEnabled(True)
 
+
+    def __set_spectrum_limits(self) -> None:
         # Límites espectrales en el GUI
         self.ui.minLineEdit.setText(str(self.dcm.min))
         self.ui.maxLineEdit.setText(str(self.dcm.max))
@@ -90,21 +55,76 @@ class MainWindow(QMainWindow):
         self.ui.minDoubleSpinBox.setValue(self.dcm.min)
         self.ui.maxDoubleSpinBox.setValue(self.dcm.max)
 
+
+    def __set_plane_limits(self) -> None:
         # Límites para cada plano
-        axial_limit = len(self.dcm.slices) - 1
-        sagital_limit, coronal_limit = self.dcm.img3d[0].shape
+        y, x, z = self.dcm.shape
 
         # Cambio de límites para los sliders y spinbox
-        self.ui.axialSlider.setRange(0, axial_limit)
-        self.ui.sagitalSlider.setRange(0, sagital_limit - 1)
-        self.ui.coronalSlider.setRange(0, coronal_limit - 1)
+        self.ui.axialSlider.setRange(0, z-1)
+        self.ui.sagitalSlider.setRange(0, x-1)
+        self.ui.coronalSlider.setRange(0, y-1)
 
-        self.ui.axialSpinBox.setRange(0, axial_limit)
-        self.ui.sagitalSpinBox.setRange(0, sagital_limit - 1)
-        self.ui.coronalSpinBox.setRange(0, coronal_limit - 1)
+        self.ui.axialSpinBox.setRange(0, z-1)
+        self.ui.sagitalSpinBox.setRange(0, x-1)
+        self.ui.coronalSpinBox.setRange(0, y-1)
+
+
+    def __connect_ui_components(self) -> None:
+        # Se conectan los slider a los spinbox de los planos
+        self.ui.axialSlider.valueChanged.connect(self.ui.axialSpinBox.setValue)
+        self.ui.sagitalSlider.valueChanged.connect(self.ui.sagitalSpinBox.setValue)
+        self.ui.coronalSlider.valueChanged.connect(self.ui.coronalSpinBox.setValue)
+
+        # Se usa una función anónima para conectar con el método de tipo slot
+        self.ui.axialSpinBox.valueChanged.connect(
+            lambda index: self.update_plane('axial', index)
+        )
+        self.ui.sagitalSpinBox.valueChanged.connect(
+            lambda index: self.update_plane('sagital', index)
+        )
+        self.ui.coronalSpinBox.valueChanged.connect(
+            lambda index: self.update_plane('coronal', index)
+        )
+
+        # Se conectan los spinbox espectrales al método de actualización
+        self.ui.minDoubleSpinBox.valueChanged.connect(self.update_spectrum)
+        self.ui.maxDoubleSpinBox.valueChanged.connect(self.update_spectrum)
+
+
+    def _load_planes(self, path) -> None:
+        print('load_planes')
+        # Se cargan las imágenes DICOM
+        try:
+            self.dcm = DicomLoader(path)
+        except (InvalidDICOM, DICOMNotFound) as e:
+            QMessageBox.critical(self, 'Error', f'{str(e)}')
+            return
+
+        # Límites espectrales
+        self.min_spectrum = self.dcm.min
+        self.max_spectrum = self.dcm.max
+
+        # Se habilitan los elementos gráficos
+        self.__enable_inputs()
+        self.__set_spectrum_limits()
+        self.__set_plane_limits()
+        self.__connect_ui_components()
+
+        # Se dibujan los planos
+        self._draw_plane('axial', 0)
+        self._draw_plane('sagital', 0)
+        self._draw_plane('coronal', 0)
+
+        QMessageBox.information(
+            self,
+            'Archivos cargados',
+            f'Se cargaron {len(self.dcm.slices)} archivos'
+        )
 
 
     def _draw_plane(self, plane: str, index: int) -> None:
+        print('draw_plane')
         # Se obtiene la matriz de píxeles del corte indicado por index
         data = self.dcm.plane(plane, index)
 
@@ -131,31 +151,9 @@ class MainWindow(QMainWindow):
         ax.imshow(data, cmap = 'gray', vmin=self.min_spectrum, vmax=self.max_spectrum)
 
 
-    def _update_plane(self, plane: str, index: int) -> None:
-        try:
-            # Se dibuja el corte en el plano seleccionado
-           self._draw_plane(plane, index)
-           # Modificación de los valores del slider/spinbox según el plano
-           match plane:
-               case 'axial':
-                   self.ui.axialSlider.setValue(index)
-                   self.ui.axialSpinBox.setValue(index)
-               case 'sagital':
-                   self.ui.sagitalSlider.setValue(index)
-                   self.ui.sagitalSpinBox.setValue(index)
-               case 'coronal':
-                   self.ui.coronalSlider.setValue(index)
-                   self.ui.coronalSpinBox.setValue(index)
-
-        # En caso de no haber abierto la carpeta
-        except AttributeError as e:
-            print(e)
-            QMessageBox.critical(
-                self, 'Error', 'No hay archivos seleccionados.'
-            )
-
     @Slot()
     def open_folder(self) -> None:
+        print('open_folder')
         path = QFileDialog.getExistingDirectory(
             self,
             'Seleccionar carpeta'
@@ -165,6 +163,7 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def update_spectrum(self) -> None:
+        print('update_spectrum')
         # Valores de actualización de la ventana espectro
         self.min_spectrum = self.ui.minDoubleSpinBox.value()
         self.max_spectrum = self.ui.maxDoubleSpinBox.value()
@@ -186,18 +185,29 @@ class MainWindow(QMainWindow):
 
 
     @Slot()
-    def update_axial_plane(self, index: int) -> None:
-        self._update_plane('axial', index)
+    def update_plane(self, plane: str, index: int) -> None:
+        print('Update plane')
+        try:
+            # Se dibuja el corte en el plano seleccionado
+           self._draw_plane(plane, index)
+           # Modificación de los valores del slider/spinbox según el plano
+           match plane:
+               case 'axial':
+                   self.ui.axialSlider.setValue(index)
+                   self.ui.axialSpinBox.setValue(index)
+               case 'sagital':
+                   self.ui.sagitalSlider.setValue(index)
+                   self.ui.sagitalSpinBox.setValue(index)
+               case 'coronal':
+                   self.ui.coronalSlider.setValue(index)
+                   self.ui.coronalSpinBox.setValue(index)
 
-
-    @Slot()
-    def update_sagital_plane(self, index: int) -> None:
-        self._update_plane('sagital', index)
-
-
-    @Slot()
-    def update_coronal_plane(self, index: int) -> None:
-        self._update_plane('coronal', index)
+        # En caso de no haber abierto la carpeta
+        except AttributeError as e:
+            print(e)
+            QMessageBox.critical(
+                self, 'Error', 'No hay archivos seleccionados.'
+            )
 
 
 if __name__ == "__main__":
