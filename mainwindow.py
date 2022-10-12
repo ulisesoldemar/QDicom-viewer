@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         self.ui.maxDoubleSpinBox.valueChanged.connect(self.update_spectrum)
 
 
-    def _load_planes(self, path) -> None:
+    def _load_planes(self, path: str) -> None:
         print('load_planes')
         # Se cargan las imágenes DICOM
         try:
@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
         ax.set_axis_off()
 
         # Se muestra la imagen
-        ax.imshow(data, cmap = 'gray', vmin=self.min_spectrum, vmax=self.max_spectrum)
+        ax.imshow(data, cmap = 'gray', vmin=self.min_spectrum, vmax=self.max_spectrum, aspect='auto')
 
 
     @Slot()
