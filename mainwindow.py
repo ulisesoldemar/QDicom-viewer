@@ -157,8 +157,9 @@ class MainWindow(QMainWindow):
         path = QFileDialog.getExistingDirectory(
             self,
             'Seleccionar carpeta'
-        ) + '/*'
-        self._load_planes(path)
+        )
+        if path:
+            self._load_planes(path + '/*')
 
 
     @Slot()
