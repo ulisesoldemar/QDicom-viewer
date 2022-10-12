@@ -22,8 +22,6 @@ class Ui_MainWindow(object):
         self.actionSalir.setObjectName(u"actionSalir")
         self.actionCarpeta = QAction(MainWindow)
         self.actionCarpeta.setObjectName(u"actionCarpeta")
-        self.actionDICOMDIR = QAction(MainWindow)
-        self.actionDICOMDIR.setObjectName(u"actionDICOMDIR")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.gridLayout_3 = QGridLayout(self.centralwidget)
@@ -197,7 +195,6 @@ class Ui_MainWindow(object):
         self.menuArchivo.addSeparator()
         self.menuArchivo.addAction(self.actionSalir)
         self.menuAbrir.addAction(self.actionCarpeta)
-        self.menuAbrir.addAction(self.actionDICOMDIR)
 
         self.retranslateUi(MainWindow)
 
@@ -213,10 +210,6 @@ class Ui_MainWindow(object):
         self.actionCarpeta.setText(QCoreApplication.translate("MainWindow", u"Carpeta", None))
 #if QT_CONFIG(shortcut)
         self.actionCarpeta.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+O", None))
-#endif // QT_CONFIG(shortcut)
-        self.actionDICOMDIR.setText(QCoreApplication.translate("MainWindow", u"DICOMDIR", None))
-#if QT_CONFIG(shortcut)
-        self.actionDICOMDIR.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Shift+O", None))
 #endif // QT_CONFIG(shortcut)
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Controlador espectral", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"Rango espectral:", None))

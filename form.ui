@@ -235,7 +235,6 @@
       <string>Abrir</string>
      </property>
      <addaction name="actionCarpeta"/>
-     <addaction name="actionDICOMDIR"/>
     </widget>
     <addaction name="menuAbrir"/>
     <addaction name="separator"/>
@@ -258,14 +257,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
-   </property>
-  </action>
-  <action name="actionDICOMDIR">
-   <property name="text">
-    <string>DICOMDIR</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+O</string>
    </property>
   </action>
  </widget>
