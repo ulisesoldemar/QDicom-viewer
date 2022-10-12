@@ -220,6 +220,7 @@ compile_commands.json
 
 # QtCreator local machine specific files for imported projects
 *creator.user*
+*pyproject.user*
 
 *_qmlcache.qrc
 
@@ -244,9 +245,11 @@ compile_commands.json
 
 # Qt Creator settings
 *.creator
+*.pyproject
 
 # User project settings
 *.creator.user*
+*.pyproject.user*
 
 # Qt Creator backups
 
